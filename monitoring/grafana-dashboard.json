@@ -1,0 +1,163 @@
+{
+    "dashboard": {
+        "title": "SOCForge - Production Dashboard",
+        "uid": "socforge-prod",
+        "timezone": "utc",
+        "refresh": "30s",
+        "panels": [
+            {
+                "title": "Request Rate (req/s)",
+                "type": "timeseries",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 0,
+                    "y": 0
+                },
+                "targets": [
+                    {
+                        "expr": "rate(socforge_http_requests_total[5m])",
+                        "legendFormat": "{{method}} {{path}} {{status}}"
+                    }
+                ]
+            },
+            {
+                "title": "P95 Latency (seconds)",
+                "type": "timeseries",
+                "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 12,
+                    "y": 0
+                },
+                "targets": [
+                    {
+                        "expr": "socforge_http_request_duration_seconds{quantile=\"0.95\"}",
+                        "legendFormat": "{{method}} {{path}}"
+                    }
+                ]
+            },
+            {
+                "title": "5xx Error Rate",
+                "type": "stat",
+                "gridPos": {
+                    "h": 4,
+                    "w": 6,
+                    "x": 0,
+                    "y": 8
+                },
+                "targets": [
+                    {
+                        "expr": "rate(socforge_http_errors_total[5m])"
+                    }
+                ],
+                "fieldConfig": {
+                    "defaults": {
+                        "thresholds": {
+                            "steps": [
+                                {
+                                    "value": 0,
+                                    "color": "green"
+                                },
+                                {
+                                    "value": 0.01,
+                                    "color": "yellow"
+                                },
+                                {
+                                    "value": 0.1,
+                                    "color": "red"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                "title": "Active Connections",
+                "type": "gauge",
+                "gridPos": {
+                    "h": 4,
+                    "w": 6,
+                    "x": 6,
+                    "y": 8
+                },
+                "targets": [
+                    {
+                        "expr": "socforge_active_connections"
+                    }
+                ],
+                "fieldConfig": {
+                    "defaults": {
+                        "max": 100,
+                        "thresholds": {
+                            "steps": [
+                                {
+                                    "value": 0,
+                                    "color": "green"
+                                },
+                                {
+                                    "value": 50,
+                                    "color": "yellow"
+                                },
+                                {
+                                    "value": 80,
+                                    "color": "red"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                "title": "Auth Failure Rate",
+                "type": "stat",
+                "gridPos": {
+                    "h": 4,
+                    "w": 6,
+                    "x": 12,
+                    "y": 8
+                },
+                "targets": [
+                    {
+                        "expr": "rate(socforge_http_requests_total{path=\"/api/auth/login\",status=~\"4..\"}[5m])"
+                    }
+                ],
+                "fieldConfig": {
+                    "defaults": {
+                        "thresholds": {
+                            "steps": [
+                                {
+                                    "value": 0,
+                                    "color": "green"
+                                },
+                                {
+                                    "value": 0.5,
+                                    "color": "yellow"
+                                },
+                                {
+                                    "value": 2,
+                                    "color": "red"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                "title": "Alert Volume (per minute)",
+                "type": "timeseries",
+                "gridPos": {
+                    "h": 4,
+                    "w": 6,
+                    "x": 18,
+                    "y": 8
+                },
+                "targets": [
+                    {
+                        "expr": "rate(socforge_http_requests_total{path=\"/api/alerts/\",method=\"POST\"}[5m]) * 60"
+                    }
+                ]
+            }
+        ]
+    }
+}

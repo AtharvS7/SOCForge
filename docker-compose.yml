@@ -1,0 +1,87 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: socforge-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-socforge}
+      POSTGRES_USER: ${POSTGRES_USER:-socforge_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-StrongPassword123!}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-socforge_admin}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - socforge-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: socforge-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass ${REDIS_PASSWORD:-StrongRedisPassword123!}
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-StrongRedisPassword123!}", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - socforge-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: socforge-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-socforge_admin}:${POSTGRES_PASSWORD:-StrongPassword123!}@postgres:5432/${POSTGRES_DB:-socforge}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-StrongRedisPassword123!}@redis:6379/0
+      - JWT_SECRET=${JWT_SECRET:-SOCForge_JWT_Super_Secret_Key_2024!}
+      - JWT_ALGORITHM=HS256
+      - JWT_EXPIRATION_MINUTES=480
+      - ENVIRONMENT=development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    networks:
+      - socforge-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: socforge-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_TARGET=http://backend:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - socforge-net
+
+volumes:
+  pgdata:
+  redisdata:
+
+
+networks:
+  socforge-net:
+    driver: bridge

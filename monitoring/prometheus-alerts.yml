@@ -1,0 +1,61 @@
+# SOCForge — Prometheus Alert Rules
+# Deploy to Prometheus alerting rules directory
+
+groups:
+  - name: socforge_alerts
+    interval: 30s
+    rules:
+      # 5xx spike — more than 5 errors in 5 minutes
+      - alert: SOCForgeHighErrorRate
+        expr: rate(socforge_http_errors_total[5m]) > 0.01
+        for: 2m
+        labels:
+          severity: critical
+          service: socforge
+        annotations:
+          summary: "SOCForge high 5xx error rate"
+          description: "Error rate is {{ $value }} errors/sec over the last 5 minutes."
+
+      # Auth failure spike — potential brute force
+      - alert: SOCForgeAuthFailureSpike
+        expr: rate(socforge_http_requests_total{path="/api/auth/login",status=~"4.."}[5m]) > 0.5
+        for: 3m
+        labels:
+          severity: warning
+          service: socforge
+        annotations:
+          summary: "Elevated authentication failure rate"
+          description: "Auth failure rate: {{ $value }} failures/sec. Possible brute force."
+
+      # High alert volume — SOC under attack or simulation running
+      - alert: SOCForgeHighAlertVolume
+        expr: rate(socforge_http_requests_total{path="/api/simulation/start",method="POST"}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          service: socforge
+        annotations:
+          summary: "High simulation/alert activity"
+          description: "Simulation rate: {{ $value }}/sec over 5 minutes."
+
+      # Backend down
+      - alert: SOCForgeBackendDown
+        expr: up{job="socforge-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: socforge
+        annotations:
+          summary: "SOCForge backend is down"
+          description: "Backend has been unreachable for over 1 minute."
+
+      # High latency
+      - alert: SOCForgeHighLatency
+        expr: socforge_http_request_duration_seconds{quantile="0.95"} > 5
+        for: 3m
+        labels:
+          severity: warning
+          service: socforge
+        annotations:
+          summary: "SOCForge P95 latency exceeds 5 seconds"
+          description: "P95 latency for {{ $labels.path }}: {{ $value }}s"

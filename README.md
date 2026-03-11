@@ -4,6 +4,27 @@
 
 A production-grade, full-stack security operations platform that simulates real-world cyber attacks, ingests telemetry, applies detection engineering logic, correlates security events, reconstructs incident timelines, and produces structured investigation reports aligned with MITRE ATT&CK.
 
+## 🌐 Live Demo
+
+- **Frontend**: [https://socforge.vercel.app](https://socforge.vercel.app)
+- **Backend API Docs**: [https://socforge-api.onrender.com/api/docs](https://socforge-api.onrender.com/api/docs)
+
+> **Note:** The backend runs on Render's free tier and may take ~30 seconds to wake up on the first request.
+
+## 📋 Project Overview — What Is SOCForge?
+
+**SOCForge** is a full-stack **Security Operations Center (SOC)** simulation and threat detection platform built for cybersecurity education and portfolio demonstration. It replicates the core functions of an enterprise SOC — the centralized team and toolset that organizations use to detect, analyze, and respond to cybersecurity incidents in real time.
+
+**Purpose:** SOCForge lets security analysts and students experience the SOC workflow end-to-end: from simulating multi-stage cyber attacks (brute force, port scans, lateral movement, command-and-control) to detecting them via configurable detection rules, correlating alerts into incidents using kill-chain analysis, and producing professional investigation reports with MITRE ATT&CK mapping.
+
+**Tech Stack:**
+- **Frontend:** React 18 + Vite, styled with Tailwind CSS, featuring real-time dashboards (Recharts), WebSocket-driven alert feeds, and dark-themed SOC analyst UI
+- **Backend:** Python FastAPI with async SQLAlchemy 2.0, JWT authentication with role-based access control (Admin/Analyst/Viewer), Redis-backed rate limiting, audit logging, and Prometheus metrics
+- **Database:** PostgreSQL (async via asyncpg) for persistent storage of events, alerts, incidents, and detection rules
+- **Cache:** Redis for rate limiting and session management
+- **Infrastructure:** Docker, Kubernetes manifests, Nginx reverse proxy, GitHub Actions CI/CD, and comprehensive monitoring (Prometheus + Grafana)
+- **Deployment:** Vercel (frontend), Render (backend), Neon.tech (PostgreSQL), Upstash (Redis) — all on free tiers at ₹0/month
+
 ---
 
 ## 🏗️ Architecture

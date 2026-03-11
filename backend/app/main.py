@@ -44,11 +44,19 @@ app = FastAPI(
 )
 
 # CORS — environment-conditional
-_allowed_origins = (
-    ["http://localhost:5173", "http://localhost:3000"]
-    if settings.ENVIRONMENT == "production"
-    else ["*"]
-)
+if settings.ENVIRONMENT == "production":
+    _allowed_origins = [
+        "https://socforge.vercel.app",
+        "https://www.socforge.vercel.app",
+    ]
+    # Allow additional origins via env var (comma-separated)
+    if hasattr(settings, "CORS_ORIGINS") and settings.CORS_ORIGINS:
+        _allowed_origins.extend(
+            [o.strip() for o in settings.CORS_ORIGINS.split(",") if o.strip()]
+        )
+else:
+    _allowed_origins = ["*"]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_allowed_origins,

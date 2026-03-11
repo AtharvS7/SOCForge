@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     # App
     ENVIRONMENT: str = "development"
     LOG_LEVEL: str = "INFO"
+    CORS_ORIGINS: str = ""  # comma-separated additional allowed origins
 
     # ── SIEM Integration (optional) ──
     SPLUNK_HEC_URL: str = ""
